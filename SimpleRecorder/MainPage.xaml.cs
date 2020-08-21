@@ -172,8 +172,13 @@ namespace SimpleRecorder
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine(ex);
 
+                var message = GetMessageForHResult(ex.HResult);
+                if (message == null)
+                {
+                    message = $"Uh-oh! Something went wrong!\n0x{ex.HResult:X8} - {ex.Message}";
+                }
                 var dialog = new MessageDialog(
-                    $"Uh-oh! Something went wrong!\n0x{ex.HResult:X8} - {ex.Message}",
+                    message,
                     "Recording failed");
 
                 await dialog.ShowAsync();
@@ -383,6 +388,18 @@ namespace SimpleRecorder
         private static T ParseEnumValue<T>(string input)
         {
             return (T)Enum.Parse(typeof(T), input, false);
+        }
+
+        private string GetMessageForHResult(int hresult)
+        {
+            switch ((uint)hresult)
+            {
+                // MF_E_TRANSFORM_TYPE_NOT_SET
+                case 0xC00D6D60:
+                    return "The combination of options you've chosen are not supported by your hardware.";
+                default:
+                    return null;
+            }
         }
 
         struct AppSettings
