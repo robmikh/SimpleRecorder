@@ -17,9 +17,27 @@
         <Grid Grid.Column="0">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="options" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
-                <ComboBox x:Name="QualityComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center"/>
-                <ComboBox x:Name="FrameRateComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center" />
-                <CheckBox x:Name="UseCaptureItemSizeCheckBox" HorizontalAlignment="Center" Margin="10" Content="Use source size as video resolution" VerticalAlignment="Top" IsChecked="False" MaxWidth="150"/>
+                <ComboBox x:Name="ResolutionComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:ResolutionItem">
+                            <TextBlock Text="{x:Bind DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox x:Name="BitrateComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:BitrateItem">
+                            <TextBlock Text="{x:Bind DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox x:Name="FrameRateComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="local:FrameRateItem">
+                            <TextBlock Text="{x:Bind DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
         </Grid>
 
