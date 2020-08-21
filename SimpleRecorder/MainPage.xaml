@@ -17,12 +17,26 @@
     </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="250">
+                <TextBlock x:Name="CaptureInfoTextBlock" Text="Pick something to capture" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
+                <Grid x:Name="CapturePreviewGrid" Margin="5" MinWidth="300" MinHeight="250" Visibility="Collapsed" />
+                <Button x:Name="CaptureButton" Margin="5" HorizontalAlignment="Center" Click="CaptureButton_Click">
+                    <FontIcon Glyph="&#xE8FC;" FontFamily="Segoe MDL2 Assets" FontSize="24"  />
+                </Button>
+            </StackPanel>
+        </Grid>
+        
+        <Grid Grid.Column="1">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="options" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
                 <ComboBox x:Name="ResolutionComboBox" Style="{StaticResource OptionComboBoxStyle}" ToolTipService.ToolTip="Resolution">
@@ -49,14 +63,8 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Column="1">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="250">
-                <TextBlock x:Name="MainTextBlock" Text="zzzz" Style="{StaticResource HeaderTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
-                <ProgressBar x:Name="MainProgressBar" IsIndeterminate="False" Background="Transparent"/>
-                <ToggleButton x:Name="RecordingToggleButton" Margin="5" HorizontalAlignment="Center" Checked="RecordingToggleButton_Checked" Unchecked="RecordingToggleButton_Unchecked">
-                    <FontIcon Glyph="&#xE722;" FontFamily="Segoe MDL2 Assets"  />
-                </ToggleButton>
-            </StackPanel>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Button Content="Start Recording" HorizontalAlignment="Center" Margin="15" />
         </Grid>
         
     </Grid>

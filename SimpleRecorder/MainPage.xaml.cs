@@ -17,6 +17,9 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media;
 using Windows.Foundation;
 using Windows.UI.ViewManagement;
+using Windows.UI.Xaml.Hosting;
+using System.Numerics;
+using Windows.UI.Composition;
 
 namespace SimpleRecorder
 {
@@ -60,6 +63,17 @@ namespace SimpleRecorder
                 var ignored = dialog.ShowAsync();
                 return;
             }
+
+            var compositor = Window.Current.Compositor;
+            _previewBrush = compositor.CreateSurfaceBrush();
+            _previewBrush.Stretch = CompositionStretch.Uniform;
+            var shadow = compositor.CreateDropShadow();
+            shadow.Mask = _previewBrush;
+            _previewVisual = compositor.CreateSpriteVisual();
+            _previewVisual.RelativeSizeAdjustment = Vector2.One;
+            _previewVisual.Brush = _previewBrush;
+            _previewVisual.Shadow = shadow;
+            ElementCompositionPreview.SetElementChildVisual(CapturePreviewGrid, _previewVisual);
 
             _device = Direct3D11Helpers.CreateDevice();
 
@@ -108,120 +122,41 @@ namespace SimpleRecorder
             FrameRateComboBox.SelectedIndex = GetFrameRateIndex(settings.FrameRate);
         }
 
-        private async void RecordingToggleButton_Checked(object sender, RoutedEventArgs e)
+        private async void CaptureButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (ToggleButton)sender;
-
-            // Get our encoder properties
-            var frameRateItem = (FrameRateItem)FrameRateComboBox.SelectedItem;
-            var resolutionItem = (ResolutionItem)ResolutionComboBox.SelectedItem;
-            var bitrateItem = (BitrateItem)BitrateComboBox.SelectedItem;
-
-            var useSourceSize = resolutionItem.IsZero();
-            var width = resolutionItem.Resolution.Width;
-            var height = resolutionItem.Resolution.Height;
-            var bitrate = bitrateItem.Bitrate;
-            var frameRate = frameRateItem.FrameRate;
-
-            // Get our capture item
             var picker = new GraphicsCapturePicker();
             var item = await picker.PickSingleItemAsync();
-            if (item == null)
+            if (item != null)
             {
-                button.IsChecked = false;
-                return;
+                StartPreview(item);
             }
-
-            // Use the capture item's size for the encoding if desired
-            if (useSourceSize)
+            else
             {
-                width = (uint)item.Size.Width;
-                height = (uint)item.Size.Height;
-
-                // Even if we're using the capture item's real size,
-                // we still want to make sure the numbers are even.
-                // Some encoders get mad if you give them odd numbers.
-                width = EnsureEven(width);
-                height = EnsureEven(height);
+                StopPreview();
             }
-
-            // Find a place to put our vidoe for now
-            var file = await GetTempFileAsync();
-
-            // Tell the user we've started recording
-            MainTextBlock.Text = "● rec";
-            var originalBrush = MainTextBlock.Foreground;
-            MainTextBlock.Foreground = new SolidColorBrush(Colors.Red);
-            MainProgressBar.IsIndeterminate = true;
-
-            // Kick off the encoding
-            try
-            {
-                using (var stream = await file.OpenAsync(FileAccessMode.ReadWrite))
-                using (_encoder = new Encoder(_device, item))
-                {
-                    await _encoder.EncodeAsync(
-                        stream, 
-                        width, height, bitrate, 
-                        frameRate);
-                }
-                MainTextBlock.Foreground = originalBrush;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                Debug.WriteLine(ex);
-
-                var message = GetMessageForHResult(ex.HResult);
-                if (message == null)
-                {
-                    message = $"Uh-oh! Something went wrong!\n0x{ex.HResult:X8} - {ex.Message}";
-                }
-                var dialog = new MessageDialog(
-                    message,
-                    "Recording failed");
-
-                await dialog.ShowAsync();
-
-                button.IsChecked = false;
-                MainTextBlock.Text = "failure";
-                MainTextBlock.Foreground = originalBrush;
-                MainProgressBar.IsIndeterminate = false;
-                return;
-            }
-
-            // At this point the encoding has finished,
-            // tell the user we're now saving
-            MainTextBlock.Text = "saving...";
-
-            // Ask the user where they'd like the video to live
-            var newFile = await PickVideoAsync();
-            if (newFile == null)
-            {
-                // User decided they didn't want it
-                // Throw out the encoded video
-                button.IsChecked = false;
-                MainTextBlock.Text = "canceled";
-                MainProgressBar.IsIndeterminate = false;
-                await file.DeleteAsync();
-                return;
-            }
-            // Move our vidoe to its new home
-            await file.MoveAndReplaceAsync(newFile);
-
-            // Tell the user we're done
-            button.IsChecked = false;
-            MainTextBlock.Text = "done";
-            MainProgressBar.IsIndeterminate = false;
-
-            // Open the final product
-            await Launcher.LaunchFileAsync(newFile);
         }
 
-        private void RecordingToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        private void StartPreview(GraphicsCaptureItem item)
         {
-            // If the encoder is doing stuff, tell it to stop
-            _encoder?.Dispose();
+            CapturePreviewGrid.Visibility = Visibility.Visible;
+            CapturePreviewGrid.Width = item.Size.Width;
+            CapturePreviewGrid.Width = item.Size.Height;
+            CaptureInfoTextBlock.Text = item.DisplayName;
+
+            var compositor = Window.Current.Compositor;
+            _preview?.Dispose();
+            _preview = new CapturePreview(_device, item);
+            var surface = _preview.CreateSurface(compositor);
+            _previewBrush.Surface = surface;
+            _preview.StartCapture();
+        }
+
+        private void StopPreview()
+        {
+            CapturePreviewGrid.Visibility = Visibility.Collapsed;
+            CaptureInfoTextBlock.Text = "Pick something to capture";
+            _preview?.Dispose();
+            _preview = null;
         }
 
         private async Task<StorageFile> PickVideoAsync()
@@ -335,7 +270,6 @@ namespace SimpleRecorder
         public void EndCurrentRecording()
         {
             _encoder?.Dispose();
-            RecordingToggleButton.IsChecked = false;
         }
 
         private static void CacheSettings(AppSettings settings)
@@ -416,5 +350,9 @@ namespace SimpleRecorder
         private List<ResolutionItem> _resolutions;
         private List<BitrateItem> _bitrates;
         private List<FrameRateItem> _frameRates;
+
+        private CapturePreview _preview;
+        private SpriteVisual _previewVisual;
+        private CompositionSurfaceBrush _previewBrush;
     }
 }
