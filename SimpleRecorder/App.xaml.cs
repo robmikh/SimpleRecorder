@@ -94,6 +94,7 @@ namespace SimpleRecorder
                 if (page != null && GraphicsCaptureSession.IsSupported())
                 {
                     page.CacheCurrentSettings();
+                    page.EndCurrentRecording();
                 }
             }
             

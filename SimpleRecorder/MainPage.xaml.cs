@@ -108,7 +108,7 @@ namespace SimpleRecorder
             FrameRateComboBox.SelectedIndex = GetFrameRateIndex(settings.FrameRate);
         }
 
-        private async void ToggleButton_Checked(object sender, RoutedEventArgs e)
+        private async void RecordingToggleButton_Checked(object sender, RoutedEventArgs e)
         {
             var button = (ToggleButton)sender;
 
@@ -213,7 +213,7 @@ namespace SimpleRecorder
             await Launcher.LaunchFileAsync(newFile);
         }
 
-        private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        private void RecordingToggleButton_Unchecked(object sender, RoutedEventArgs e)
         {
             // If the encoder is doing stuff, tell it to stop
             _encoder?.Dispose();
@@ -325,6 +325,12 @@ namespace SimpleRecorder
         {
             var settings = GetCurrentSettings();
             CacheSettings(settings);
+        }
+
+        public void EndCurrentRecording()
+        {
+            _encoder?.Dispose();
+            RecordingToggleButton.IsChecked = false;
         }
 
         private static void CacheSettings(AppSettings settings)
