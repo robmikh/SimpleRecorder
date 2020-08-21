@@ -54,7 +54,7 @@ namespace CaptureEncoder
             _closedEvent = new ManualResetEvent(false);
             _events = new[] { _closedEvent, _frameEvent };
 
-            InitializeBlankTexture(size);
+            InitializeComposeTexture(size);
             InitializeCapture(size);
         }
 
@@ -71,7 +71,7 @@ namespace CaptureEncoder
             _session.StartCapture();
         }
 
-        private void InitializeBlankTexture(SizeInt32 size)
+        private void InitializeComposeTexture(SizeInt32 size)
         {
             var description = new SharpDX.Direct3D11.Texture2DDescription
             {
@@ -90,12 +90,8 @@ namespace CaptureEncoder
                 CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.None,
                 OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None
             };
-            _blankTexture = new SharpDX.Direct3D11.Texture2D(_d3dDevice, description);
-
-            using (var renderTargetView = new SharpDX.Direct3D11.RenderTargetView(_d3dDevice, _blankTexture))
-            {
-                _d3dDevice.ImmediateContext.ClearRenderTargetView(renderTargetView, new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 1));
-            }
+            _composeTexture = new SharpDX.Direct3D11.Texture2D(_d3dDevice, description);
+            _composeRenderTargetView = new SharpDX.Direct3D11.RenderTargetView(_d3dDevice, _composeTexture);
         }
 
         private void SetResult(Direct3D11CaptureFrame frame)
@@ -130,8 +126,10 @@ namespace CaptureEncoder
             _item = null;
             _device = null;
             _d3dDevice = null;
-            _blankTexture?.Dispose();
-            _blankTexture = null;
+            _composeTexture?.Dispose();
+            _composeTexture = null;
+            _composeRenderTargetView?.Dispose();
+            _composeRenderTargetView = null;
             _currentFrame?.Dispose();
         }
 
@@ -153,6 +151,13 @@ namespace CaptureEncoder
             using (var multithreadLock = new MultithreadLock(_multithread))
             using (var sourceTexture = Direct3D11Helpers.CreateSharpDXTexture2D(_currentFrame.Surface))
             {
+                _d3dDevice.ImmediateContext.ClearRenderTargetView(_composeRenderTargetView, new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 1));
+
+                var width = Math.Clamp(_currentFrame.ContentSize.Width, 0, _currentFrame.Surface.Description.Width);
+                var height = Math.Clamp(_currentFrame.ContentSize.Height, 0, _currentFrame.Surface.Description.Height);
+                var region = new SharpDX.Direct3D11.ResourceRegion(0, 0, 0, width, height, 1);
+                _d3dDevice.ImmediateContext.CopySubresourceRegion(sourceTexture, 0, region, _composeTexture, 0);
+
                 var description = sourceTexture.Description;
                 description.Usage = SharpDX.Direct3D11.ResourceUsage.Default;
                 description.BindFlags = SharpDX.Direct3D11.BindFlags.ShaderResource | SharpDX.Direct3D11.BindFlags.RenderTarget;
@@ -161,13 +166,7 @@ namespace CaptureEncoder
 
                 using (var copyTexture = new SharpDX.Direct3D11.Texture2D(_d3dDevice, description))
                 {
-                    var width = Math.Clamp(_currentFrame.ContentSize.Width, 0, _currentFrame.Surface.Description.Width);
-                    var height = Math.Clamp(_currentFrame.ContentSize.Height, 0, _currentFrame.Surface.Description.Height);
-
-                    var region = new SharpDX.Direct3D11.ResourceRegion(0, 0, 0, width, height, 1);
-
-                    _d3dDevice.ImmediateContext.CopyResource(_blankTexture, copyTexture);
-                    _d3dDevice.ImmediateContext.CopySubresourceRegion(sourceTexture, 0, region, copyTexture, 0);
+                    _d3dDevice.ImmediateContext.CopyResource(_composeTexture, copyTexture);
                     result.Surface = Direct3D11Helpers.CreateDirect3DSurfaceFromSharpDXTexture(copyTexture);
                 }
             }
@@ -184,7 +183,8 @@ namespace CaptureEncoder
         private IDirect3DDevice _device;
         private SharpDX.Direct3D11.Device _d3dDevice;
         private SharpDX.Direct3D11.Multithread _multithread;
-        private SharpDX.Direct3D11.Texture2D _blankTexture;
+        private SharpDX.Direct3D11.Texture2D _composeTexture;
+        private SharpDX.Direct3D11.RenderTargetView _composeRenderTargetView;
 
         private ManualResetEvent[] _events;
         private ManualResetEvent _frameEvent;
