@@ -8,6 +8,14 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <Style TargetType="ComboBox" x:Key="OptionComboBoxStyle">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+    </Page.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -17,21 +25,21 @@
         <Grid Grid.Column="0">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="options" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
-                <ComboBox x:Name="ResolutionComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center" ToolTipService.ToolTip="Resolution">
+                <ComboBox x:Name="ResolutionComboBox" Style="{StaticResource OptionComboBoxStyle}" ToolTipService.ToolTip="Resolution">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="local:ResolutionItem">
                             <TextBlock Text="{x:Bind DisplayName}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <ComboBox x:Name="BitrateComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center" ToolTipService.ToolTip="Bitrate">
+                <ComboBox x:Name="BitrateComboBox" Style="{StaticResource OptionComboBoxStyle}" ToolTipService.ToolTip="Bitrate">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="local:BitrateItem">
                             <TextBlock Text="{x:Bind DisplayName}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <ComboBox x:Name="FrameRateComboBox" Margin="10" MinWidth="150" HorizontalAlignment="Center" ToolTipService.ToolTip="Frame Rate">
+                <ComboBox x:Name="FrameRateComboBox" Style="{StaticResource OptionComboBoxStyle}" ToolTipService.ToolTip="Frame Rate">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="local:FrameRateItem">
                             <TextBlock Text="{x:Bind DisplayName}" />
