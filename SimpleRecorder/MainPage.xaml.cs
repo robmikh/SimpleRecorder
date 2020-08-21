@@ -85,10 +85,10 @@ namespace SimpleRecorder
             _bitrates = new List<BitrateItem>();
             foreach (var bitrate in EncoderPresets.Bitrates)
             {
+                var mbps = (float)bitrate / 1000000;
                 _bitrates.Add(new BitrateItem()
                 {
-                    // TODO: Name units
-                    DisplayName = $"{bitrate}",
+                    DisplayName = $"{mbps:0.##} Mbps",
                     Bitrate = bitrate,
                 });
             }
