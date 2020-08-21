@@ -21,7 +21,6 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <AppxBundlePlatforms>x86|x64|arm|arm64</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>36515C0F4C6F2D18EEA73961DD90E3F9D5CB9E61</PackageCertificateThumbprint>
     <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxBundle>Always</AppxBundle>
@@ -136,10 +135,8 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="SimpleRecorder_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -170,8 +167,17 @@
       <Name>CaptureEncoder</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SimpleRecorder_TempCert.snk" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>SimpleRecorder_TempCert.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
