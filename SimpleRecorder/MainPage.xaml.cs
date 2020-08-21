@@ -15,6 +15,8 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media;
+using Windows.Foundation;
+using Windows.UI.ViewManagement;
 
 namespace SimpleRecorder
 {
@@ -23,6 +25,9 @@ namespace SimpleRecorder
         public MainPage()
         {
             InitializeComponent();
+            
+            ApplicationView.GetForCurrentView().SetPreferredMinSize(
+               new Size(350, 200));
 
             if (!GraphicsCaptureSession.IsSupported())
             {
