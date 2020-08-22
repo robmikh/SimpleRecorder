@@ -93,8 +93,8 @@ namespace CaptureEncoder
                 }
 
                 using (var sourceTexture = Direct3D11Helpers.CreateSharpDXTexture2D(frame.Surface))
+                using (var backBuffer = _swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0))
                 {
-                    var backBuffer = _swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0);
                     _d3dDevice.ImmediateContext.CopyResource(sourceTexture, backBuffer);
                 }
 
