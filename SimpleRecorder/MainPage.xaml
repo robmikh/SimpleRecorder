@@ -26,7 +26,13 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
+        <Grid x:Name="PreviewContainerGrid" Grid.Column="0" SizeChanged="PreviewContainerGrid_SizeChanged">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="0" />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!--
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="250">
                 <TextBlock x:Name="CaptureInfoTextBlock" Text="Pick something to capture" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
                 <Grid x:Name="CapturePreviewGrid" Margin="5" MinWidth="300" MinHeight="250" Visibility="Collapsed" />
@@ -34,6 +40,15 @@
                     <FontIcon Glyph="&#xE8FC;" FontFamily="Segoe MDL2 Assets" FontSize="24"  />
                 </Button>
             </StackPanel>
+            -->
+
+            <TextBlock x:Name="CaptureInfoTextBlock" Text="Pick something to capture" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" VerticalAlignment="Bottom" />
+
+            <Grid x:Name="CapturePreviewGrid" Margin="15" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+            <Button x:Name="CaptureButton" Grid.Row="2" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Top" Click="CaptureButton_Click">
+                <FontIcon Glyph="&#xE8FC;" FontFamily="Segoe MDL2 Assets" FontSize="24"  />
+            </Button>
         </Grid>
         
         <Grid Grid.Column="1">

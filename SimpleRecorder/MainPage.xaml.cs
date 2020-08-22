@@ -135,12 +135,25 @@ namespace SimpleRecorder
                 StopPreview();
             }
         }
+        private void PreviewContainerGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+
+        }
+
+        private void ResizePreview()
+        {
+            var availableWidth = PreviewContainerGrid.ActualWidth;
+            var previewWidth = availableWidth - 30;
+
+            
+        }
 
         private void StartPreview(GraphicsCaptureItem item)
         {
+            PreviewContainerGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
             CapturePreviewGrid.Visibility = Visibility.Visible;
-            CapturePreviewGrid.Width = item.Size.Width;
-            CapturePreviewGrid.Width = item.Size.Height;
+            //CapturePreviewGrid.Width = item.Size.Width;
+            //CapturePreviewGrid.Width = item.Size.Height;
             CaptureInfoTextBlock.Text = item.DisplayName;
 
             var compositor = Window.Current.Compositor;
@@ -153,6 +166,7 @@ namespace SimpleRecorder
 
         private void StopPreview()
         {
+            PreviewContainerGrid.RowDefinitions[1].Height = new GridLength(0);
             CapturePreviewGrid.Visibility = Visibility.Collapsed;
             CaptureInfoTextBlock.Text = "Pick something to capture";
             _preview?.Dispose();
