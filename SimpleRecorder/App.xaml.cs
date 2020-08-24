@@ -85,19 +85,24 @@ namespace SimpleRecorder
         {
             var deferral = e.SuspendingOperation.GetDeferral();
 
-            // Save our state
-            var rootFrame = Window.Current.Content as Frame;
-            if (rootFrame != null)
+            // Don't bother if capture isn't supported
+            if (GraphicsCaptureSession.IsSupported())
             {
-                var page = rootFrame.Content as MainPage;
-
-                if (page != null && GraphicsCaptureSession.IsSupported())
+                // Save our state
+                var rootFrame = Window.Current.Content as Frame;
+                if (rootFrame != null)
                 {
-                    page.CacheCurrentSettings();
-                    page.EndCurrentRecording();
+                    if (rootFrame.Content is MainPage mainPage)
+                    {
+                        mainPage.CacheCurrentSettings();
+                    }
+                    else if (rootFrame.Content is RecordingPage recordingPage)
+                    {
+                        recordingPage.EndCurrentRecording();
+                    }
                 }
             }
-            
+
             deferral.Complete();
         }
     }
