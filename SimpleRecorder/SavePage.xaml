@@ -18,7 +18,7 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="15" HorizontalAlignment="Center">
             <Button Content="Delete" Margin="15, 0, 15, 0" Click="DeleteButton_Click"  />
-            <Button Content="Save" Margin="15, 0, 15, 0" Click="SaveButton_Click"  />
+            <Button Content="Save" Margin="15, 0, 15, 0" Click="SaveButton_Click" Style="{ThemeResource AccentButtonStyle}"  />
         </StackPanel>
     </Grid>
 </Page>

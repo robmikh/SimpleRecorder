@@ -23,7 +23,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock x:Name="RecordingStatusTextBlock" Grid.Column="0" Margin="15" HorizontalAlignment="Center" Text="● rec" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="Red" />
-            <Button Grid.Column="1" Margin="15" HorizontalAlignment="Center" Content="Stop Recording" Click="StopRecordingButton_Click" />
+            <Button Grid.Column="1" Margin="15" HorizontalAlignment="Center" Content="Stop Recording" Click="StopRecordingButton_Click" Style="{ThemeResource AccentButtonStyle}" />
         </Grid>
     </Grid>
 </Page>
