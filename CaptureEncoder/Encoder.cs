@@ -2,12 +2,14 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Graphics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.Media.Core;
 using Windows.Media.MediaProperties;
 using Windows.Media.Transcoding;
 using Windows.Storage.Streams;
+using Windows.UI.Composition;
 
 namespace CaptureEncoder
 {
@@ -16,8 +18,10 @@ namespace CaptureEncoder
         public Encoder(IDirect3DDevice device, GraphicsCaptureItem item)
         {
             _device = device;
+            _d3dDevice = Direct3D11Helpers.CreateSharpDXDevice(device);
             _captureItem = item;
             _isRecording = false;
+            _previewLock = new object();
 
             CreateMediaObjects();
         }
@@ -32,11 +36,13 @@ namespace CaptureEncoder
             if (!_isRecording)
             {
                 _isRecording = true;
+                _width = width;
+                _height = height;
 
                 _frameGenerator = new CaptureFrameWait(
                     _device,
                     _captureItem,
-                    _captureItem.Size);
+                    new SizeInt32() { Width = (int)width, Height = (int)height });
 
                 using (_frameGenerator)
                 {
@@ -55,6 +61,23 @@ namespace CaptureEncoder
                     await transcode.TranscodeAsync();
                 }
             }
+        }
+
+        public ICompositionSurface CreatePreviewSurface(Compositor compositor)
+        {
+            if (!_isPreviewing)
+            {
+                lock (_previewLock)
+                {
+                    if (!_isPreviewing)
+                    {
+                        _preview = new EncoderPreview(_d3dDevice);
+                        _isPreviewing = true;
+                    }
+                }
+            }
+
+            return _preview.CreateCompositionSurface(compositor);
         }
 
         public void Dispose()
@@ -114,10 +137,17 @@ namespace CaptureEncoder
                             return;
                         }
 
-                        var timeStamp = frame.SystemRelativeTime;
+                        if (_isPreviewing)
+                        {
+                            lock (_previewLock)
+                            {
+                                _preview.PresentSurface(frame.Surface);
+                            }
+                        }
 
+                        var timeStamp = frame.SystemRelativeTime;
                         var sample = MediaStreamSample.CreateFromDirect3D11Surface(frame.Surface, timeStamp);
-                        args.Request.Sample = sample;                       
+                        args.Request.Sample = sample;
                     }
                 }
                 catch (Exception e)
@@ -144,15 +174,101 @@ namespace CaptureEncoder
             }
         }
 
+        private class EncoderPreview
+        {
+            public EncoderPreview(SharpDX.Direct3D11.Device device)
+            {
+                _d3dDevice = device;
+
+                var dxgiDevice = _d3dDevice.QueryInterface<SharpDX.DXGI.Device>();
+                var adapter = dxgiDevice.GetParent<SharpDX.DXGI.Adapter>();
+                var factory = adapter.GetParent<SharpDX.DXGI.Factory2>();
+
+                var description = new SharpDX.DXGI.SwapChainDescription1
+                {
+                    Width = 1,
+                    Height = 1,
+                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                    Usage = SharpDX.DXGI.Usage.RenderTargetOutput,
+                    SampleDescription = new SharpDX.DXGI.SampleDescription()
+                    {
+                        Count = 1,
+                        Quality = 0
+                    },
+                    BufferCount = 2,
+                    Scaling = SharpDX.DXGI.Scaling.Stretch,
+                    SwapEffect = SharpDX.DXGI.SwapEffect.FlipSequential,
+                    AlphaMode = SharpDX.DXGI.AlphaMode.Premultiplied
+                };
+                var swapChain = new SharpDX.DXGI.SwapChain1(factory, dxgiDevice, ref description);
+
+                using (var backBuffer = swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0))
+                using (var renderTargetView = new SharpDX.Direct3D11.RenderTargetView(_d3dDevice, backBuffer))
+                {
+                    _d3dDevice.ImmediateContext.ClearRenderTargetView(renderTargetView, new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 0));
+                }
+
+                _swapChain = swapChain;
+            }
+
+            public ICompositionSurface CreateCompositionSurface(Compositor compositor)
+            {
+                return compositor.CreateCompositionSurfaceForSwapChain(_swapChain);
+            }
+
+            public void PresentSurface(IDirect3DSurface surface)
+            {
+                using (var sourceTexture = Direct3D11Helpers.CreateSharpDXTexture2D(surface))
+                {
+                    if (!_isSwapChainSized)
+                    {
+                        var description = sourceTexture.Description;
+
+                        _swapChain.ResizeBuffers(
+                            2,
+                            description.Width,
+                            description.Height,
+                            SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                            SharpDX.DXGI.SwapChainFlags.None);
+
+                        _isSwapChainSized = true;
+                    }
+
+                    using (var backBuffer = _swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0))
+                    using (var renderTargetView = new SharpDX.Direct3D11.RenderTargetView(_d3dDevice, backBuffer))
+                    {
+                        _d3dDevice.ImmediateContext.ClearRenderTargetView(renderTargetView, new SharpDX.Mathematics.Interop.RawColor4(0, 0, 0, 1));
+                        _d3dDevice.ImmediateContext.CopyResource(sourceTexture, backBuffer);
+                    }
+                }
+
+                _swapChain.Present(1, SharpDX.DXGI.PresentFlags.None);
+            }
+
+            private SharpDX.Direct3D11.Device _d3dDevice;
+            private SharpDX.DXGI.SwapChain1 _swapChain;
+
+            private bool _isSwapChainSized = false;
+        }
+
         private IDirect3DDevice _device;
+        private SharpDX.Direct3D11.Device _d3dDevice;
 
         private GraphicsCaptureItem _captureItem;
         private CaptureFrameWait _frameGenerator;
+
+        private uint _width;
+        private uint _height;
 
         private VideoStreamDescriptor _videoDescriptor;
         private MediaStreamSource _mediaStreamSource;
         private MediaTranscoder _transcoder;
         private bool _isRecording;
+
+        private bool _isPreviewing = false;
+        private object _previewLock;
+        private EncoderPreview _preview;
+
         private bool _closed = false;
     }
 

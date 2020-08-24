@@ -48,6 +48,8 @@ namespace CaptureEncoder
             _framePool.FrameArrived += OnFrameArrived;
         }
 
+        public GraphicsCaptureItem Target => _item;
+
         public void StartCapture()
         {
             _session.StartCapture();

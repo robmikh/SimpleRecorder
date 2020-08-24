@@ -135,25 +135,11 @@ namespace SimpleRecorder
                 StopPreview();
             }
         }
-        private void PreviewContainerGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-
-        }
-
-        private void ResizePreview()
-        {
-            var availableWidth = PreviewContainerGrid.ActualWidth;
-            var previewWidth = availableWidth - 30;
-
-            
-        }
 
         private void StartPreview(GraphicsCaptureItem item)
         {
-            PreviewContainerGrid.RowDefinitions[1].Height = new GridLength(1, GridUnitType.Star);
+            PreviewContainerGrid.RowDefinitions[1].Height = new GridLength(2, GridUnitType.Star);
             CapturePreviewGrid.Visibility = Visibility.Visible;
-            //CapturePreviewGrid.Width = item.Size.Width;
-            //CapturePreviewGrid.Width = item.Size.Height;
             CaptureInfoTextBlock.Text = item.DisplayName;
 
             var compositor = Window.Current.Compositor;
@@ -162,6 +148,8 @@ namespace SimpleRecorder
             var surface = _preview.CreateSurface(compositor);
             _previewBrush.Surface = surface;
             _preview.StartCapture();
+
+            StartRecordingButton.IsEnabled = true;
         }
 
         private void StopPreview()
@@ -171,38 +159,8 @@ namespace SimpleRecorder
             CaptureInfoTextBlock.Text = "Pick something to capture";
             _preview?.Dispose();
             _preview = null;
-        }
 
-        private async Task<StorageFile> PickVideoAsync()
-        {
-            var picker = new FileSavePicker();
-            picker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            picker.SuggestedFileName = "recordedVideo";
-            picker.DefaultFileExtension = ".mp4";
-            picker.FileTypeChoices.Add("MP4 Video", new List<string> { ".mp4" });
-
-            var file = await picker.PickSaveFileAsync();
-            return file;
-        }
-
-        private async Task<StorageFile> GetTempFileAsync()
-        {
-            var folder = ApplicationData.Current.TemporaryFolder;
-            var name = DateTime.Now.ToString("yyyyMMdd-HHmm-ss");
-            var file = await folder.CreateFileAsync($"{name}.mp4");
-            return file;
-        }
-
-        private uint EnsureEven(uint number)
-        {
-            if (number % 2 == 0)
-            {
-                return number;
-            }
-            else
-            {
-                return number + 1;
-            }
+            StartRecordingButton.IsEnabled = false;
         }
 
         private AppSettings GetCurrentSettings()
@@ -281,11 +239,6 @@ namespace SimpleRecorder
             CacheSettings(settings);
         }
 
-        public void EndCurrentRecording()
-        {
-            _encoder?.Dispose();
-        }
-
         private static void CacheSettings(AppSettings settings)
         {
             var localSettings = ApplicationData.Current.LocalSettings;
@@ -338,16 +291,39 @@ namespace SimpleRecorder
             return (T)Enum.Parse(typeof(T), input, false);
         }
 
-        private string GetMessageForHResult(int hresult)
+        private void StartRecordingButton_Click(object sender, RoutedEventArgs e)
         {
-            switch ((uint)hresult)
+            if (_preview == null)
             {
-                // MF_E_TRANSFORM_TYPE_NOT_SET
-                case 0xC00D6D60:
-                    return "The combination of options you've chosen are not supported by your hardware.";
-                default:
-                    return null;
+                throw new InvalidOperationException("There is no current preview!");
             }
+
+            // Get our encoder properties
+            var frameRateItem = (FrameRateItem)FrameRateComboBox.SelectedItem;
+            var resolutionItem = (ResolutionItem)ResolutionComboBox.SelectedItem;
+            var bitrateItem = (BitrateItem)BitrateComboBox.SelectedItem;
+
+            var useSourceSize = resolutionItem.IsZero();
+            var width = resolutionItem.Resolution.Width;
+            var height = resolutionItem.Resolution.Height;
+            var bitrate = bitrateItem.Bitrate;
+            var frameRate = frameRateItem.FrameRate;
+
+            // Use the capture item's size for the encoding if desired
+            if (useSourceSize)
+            {
+                var targetSize = _preview.Target.Size;
+                width = (uint)targetSize.Width;
+                height = (uint)targetSize.Height;
+            }
+            var resolution = new SizeUInt32() { Width = width, Height = height };
+
+            var recordingOptions = new RecordingOptions(_preview.Target, resolution, bitrate, frameRate);
+            _preview.Dispose();
+            _preview = null;
+            StartRecordingButton.IsEnabled = false;
+
+            Frame.Navigate(typeof(RecordingPage), recordingOptions);
         }
 
         struct AppSettings
@@ -359,7 +335,6 @@ namespace SimpleRecorder
         }
 
         private IDirect3DDevice _device;
-        private Encoder _encoder;
 
         private List<ResolutionItem> _resolutions;
         private List<BitrateItem> _bitrates;
