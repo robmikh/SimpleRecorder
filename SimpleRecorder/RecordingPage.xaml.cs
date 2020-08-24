@@ -1,21 +1,16 @@
 ﻿using CaptureEncoder;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.Storage;
-using Windows.Storage.Pickers;
-using Windows.System;
-using Windows.UI;
 using Windows.UI.Composition;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Hosting;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 namespace SimpleRecorder
@@ -64,10 +59,14 @@ namespace SimpleRecorder
             ElementCompositionPreview.SetElementChildVisual(PreviewGrid, visual);
         }
 
+        public void EndCurrentRecording()
+        {
+            _encoder.Dispose();
+        }
+
         private void StopRecordingButton_Click(object sender, RoutedEventArgs e)
         {
             _encoder?.Dispose();
-            // TODO: Go back to the main page?
         }
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
@@ -85,9 +84,6 @@ namespace SimpleRecorder
             // Find a place to put our vidoe for now
             var file = await GetTempFileAsync();
 
-            // Tell the user we've started recording
-            SetUIMode(RecordingState.Recording);
-
             // Kick off the encoding
             try
             {
@@ -102,7 +98,6 @@ namespace SimpleRecorder
                         width, height, options.Bitrate,
                         options.FrameRate);
                 }
-                //MainTextBlock.Foreground = originalBrush;
             }
             catch (Exception ex)
             {
@@ -120,55 +115,13 @@ namespace SimpleRecorder
 
                 await dialog.ShowAsync();
 
-                // Tell the user we have failed
-                SetUIMode(RecordingState.Failed);
-                // TODO: what to do on failure?
+                // Go back to the main page
+                Frame.GoBack();
                 return;
             }
 
-            // At this point the encoding has finished
-            SetUIMode(RecordingState.Done);
-
-            // Ask the user where they'd like the video to live
-            var newFile = await PickVideoAsync();
-            if (newFile == null)
-            {
-                // User decided they didn't want it
-                // Throw out the encoded video
-                //button.IsChecked = false;
-                //MainTextBlock.Text = "canceled";
-                //MainProgressBar.IsIndeterminate = false;
-                await file.DeleteAsync();
-                return;
-            }
-            // Move our vidoe to its new home
-            await file.MoveAndReplaceAsync(newFile);
-
-            // Open the final product
-            await Launcher.LaunchFileAsync(newFile);
-        }
-
-        private void SetUIMode(RecordingState state)
-        {
-            switch (state)
-            {
-                case RecordingState.Recording:
-                    RecordingStatusTextBlock.Text = "● rec";
-                    RecordingStatusTextBlock.Foreground = new SolidColorBrush(Colors.Red);
-                    break;
-                case RecordingState.Failed:
-                    RecordingStatusTextBlock.Text = "failure";
-                    RecordingStatusTextBlock.Foreground = new SolidColorBrush((Color)Resources["SystemColorWindowTextColor"]);
-                    break;
-                case RecordingState.Done:
-                    RecordingStatusTextBlock.Text = "done";
-                    RecordingStatusTextBlock.Foreground = new SolidColorBrush((Color)Resources["SystemColorWindowTextColor"]);
-                    break;
-                case RecordingState.Interrupted:
-                    RecordingStatusTextBlock.Text = "interrupted";
-                    RecordingStatusTextBlock.Foreground = new SolidColorBrush((Color)Resources["SystemColorWindowTextColor"]);
-                    break;
-            }
+            // At this point the encoding has finished, let the user preview the file
+            Frame.Navigate(typeof(SavePage), file);
         }
 
         private uint EnsureEven(uint number)
@@ -201,18 +154,6 @@ namespace SimpleRecorder
                 default:
                     return null;
             }
-        }
-
-        private async Task<StorageFile> PickVideoAsync()
-        {
-            var picker = new FileSavePicker();
-            picker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            picker.SuggestedFileName = "recordedVideo";
-            picker.DefaultFileExtension = ".mp4";
-            picker.FileTypeChoices.Add("MP4 Video", new List<string> { ".mp4" });
-
-            var file = await picker.PickSaveFileAsync();
-            return file;
         }
 
         private IDirect3DDevice _device;

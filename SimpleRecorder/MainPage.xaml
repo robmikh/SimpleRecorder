@@ -70,7 +70,7 @@
         </Grid>
 
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
-            <Button x:Name="StartRecordingButton" Content="Start Recording" HorizontalAlignment="Center" Margin="15" Click="StartRecordingButton_Click" />
+            <Button x:Name="StartRecordingButton" Content="Start Recording" HorizontalAlignment="Center" Margin="15" IsEnabled="False" Click="StartRecordingButton_Click" />
         </Grid>
         
     </Grid>

@@ -2,24 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.Media.MediaProperties;
 using Windows.Storage;
-using Windows.Storage.Pickers;
-using Windows.System;
-using Windows.UI;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Media;
 using Windows.Foundation;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml.Hosting;
 using System.Numerics;
 using Windows.UI.Composition;
+using Windows.UI.Xaml.Navigation;
 
 namespace SimpleRecorder
 {
@@ -50,7 +45,7 @@ namespace SimpleRecorder
             InitializeComponent();
             
             ApplicationView.GetForCurrentView().SetPreferredMinSize(
-               new Size(350, 200));
+               new Size(539, 285));
 
             if (!GraphicsCaptureSession.IsSupported())
             {
@@ -120,6 +115,12 @@ namespace SimpleRecorder
             }
             FrameRateComboBox.ItemsSource = _frameRates;
             FrameRateComboBox.SelectedIndex = GetFrameRateIndex(settings.FrameRate);
+        }
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            CacheCurrentSettings();
+            base.OnNavigatingFrom(e);
         }
 
         private async void CaptureButton_Click(object sender, RoutedEventArgs e)
@@ -297,6 +298,9 @@ namespace SimpleRecorder
             {
                 throw new InvalidOperationException("There is no current preview!");
             }
+
+            var temp = Window.Current.Bounds;
+            Debug.WriteLine($"Width: {temp.Width}  Height: {temp.Height}");
 
             // Get our encoder properties
             var frameRateItem = (FrameRateItem)FrameRateComboBox.SelectedItem;

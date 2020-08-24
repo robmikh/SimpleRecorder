@@ -22,11 +22,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="RecordingStatusTextBlock" Grid.Column="0" Margin="15" HorizontalAlignment="Center" Text="● rec" Style="{StaticResource SubtitleTextBlockStyle}" >
-                <TextBlock.Foreground>
-                    <SolidColorBrush Color="{ThemeResource SystemColorWindowTextColor}"/>
-                </TextBlock.Foreground>
-            </TextBlock>
+            <TextBlock x:Name="RecordingStatusTextBlock" Grid.Column="0" Margin="15" HorizontalAlignment="Center" Text="● rec" Style="{StaticResource SubtitleTextBlockStyle}" Foreground="Red" />
             <Button Grid.Column="1" Margin="15" HorizontalAlignment="Center" Content="Stop Recording" Click="StopRecordingButton_Click" />
         </Grid>
     </Grid>

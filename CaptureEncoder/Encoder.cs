@@ -99,6 +99,7 @@ namespace CaptureEncoder
         private void DisposeInternal()
         {
             _frameGenerator.Dispose();
+            _preview?.Dispose();
         }
 
         private void CreateMediaObjects()
@@ -174,7 +175,7 @@ namespace CaptureEncoder
             }
         }
 
-        private class EncoderPreview
+        private class EncoderPreview : IDisposable
         {
             public EncoderPreview(SharpDX.Direct3D11.Device device)
             {
@@ -243,6 +244,12 @@ namespace CaptureEncoder
                 }
 
                 _swapChain.Present(1, SharpDX.DXGI.PresentFlags.None);
+            }
+
+            public void Dispose()
+            {
+                _swapChain.Dispose();
+                _d3dDevice.Dispose();
             }
 
             private SharpDX.Direct3D11.Device _d3dDevice;

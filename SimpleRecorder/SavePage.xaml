@@ -1,0 +1,24 @@
+﻿<Page
+    x:Class="SimpleRecorder.SavePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SimpleRecorder"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <MediaPlayerElement x:Name="PreviewPlayer" Margin="15" AutoPlay="True" AreTransportControlsEnabled="True" />
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="15" HorizontalAlignment="Center">
+            <Button Content="Delete" Margin="15, 0, 15, 0" Click="DeleteButton_Click"  />
+            <Button Content="Save" Margin="15, 0, 15, 0" Click="SaveButton_Click"  />
+        </StackPanel>
+    </Grid>
+</Page>
