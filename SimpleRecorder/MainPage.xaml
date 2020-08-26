@@ -70,7 +70,13 @@
         </Grid>
 
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
-            <Button x:Name="StartRecordingButton" Content="Start Recording" HorizontalAlignment="Center" Margin="15" IsEnabled="False" Click="StartRecordingButton_Click" Style="{ThemeResource AccentButtonStyle}" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <Button x:Name="StartRecordingButton" Grid.Column="1" Content="Start Recording" HorizontalAlignment="Center" Margin="15" IsEnabled="False" Click="StartRecordingButton_Click" Style="{ThemeResource AccentButtonStyle}" />
         </Grid>
         
     </Grid>
