@@ -8,29 +8,12 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Frame x:Name="MainFrame" />
 
-        <Frame x:Name="MainFrame" Grid.RowSpan="2"/>
-
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <ToggleButton x:Name="CompactOverlayButton" Grid.Column="0" Margin="15" IsEnabled="False" Checked="CompactOverlayButton_Checked" Unchecked="CompactOverlayButton_Unchecked">
-                <FontIcon Glyph="&#xEE71;" FontFamily="Segoe MDL2 Assets" FontSize="24"  />
-            </ToggleButton>
-
-
-            <Button x:Name="InfoButton" Grid.Column="2" Margin="15" Click="InfoButton_Click">
-                <FontIcon Glyph="&#xF142;" FontFamily="Segoe MDL2 Assets" FontSize="24"  />
-            </Button>
-        </Grid>
-    </Grid>
+    <Page.BottomAppBar>
+        <CommandBar ClosedDisplayMode="Minimal" >
+            <AppBarToggleButton x:Name="CompactOverlayButton" IsEnabled="False" Icon="NewWindow" Label="Overlay" Checked="CompactOverlayButton_Checked" Unchecked="CompactOverlayButton_Unchecked" />
+            <AppBarButton Icon="Help" Label="About" Click="InfoButton_Click" />
+        </CommandBar>
+    </Page.BottomAppBar>
 </Page>
