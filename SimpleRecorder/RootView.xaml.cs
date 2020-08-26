@@ -36,7 +36,7 @@ namespace SimpleRecorder
 
         private async void InfoButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new MessageDialog("Placeholder info dialog");
+            var dialog = new AboutDialog();
             await dialog.ShowAsync();
         }
 

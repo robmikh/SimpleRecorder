@@ -1,0 +1,22 @@
+﻿<ContentDialog
+    x:Class="SimpleRecorder.AboutDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SimpleRecorder"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Simple Screen Recorder"
+    PrimaryButtonText="Ok"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+
+    <StackPanel>
+        <RichTextBlock >
+            <Paragraph>Simple Screen Recorder is a sample application showing off the Windows.Graphics.Capture and Windows.Media.Transcoding APIs.</Paragraph>
+        </RichTextBlock>
+
+        <HyperlinkButton NavigateUri="https://github.com/robmikh/SimpleRecorder">
+            GitHub
+        </HyperlinkButton>
+    </StackPanel>
+</ContentDialog>
