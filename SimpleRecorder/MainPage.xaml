@@ -44,7 +44,7 @@
         
         <Grid Grid.Column="1">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="options" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
+                <TextBlock Text="Options" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Stretch" HorizontalTextAlignment="Center" />
                 <ComboBox x:Name="ResolutionComboBox" Style="{StaticResource OptionComboBoxStyle}" ToolTipService.ToolTip="Resolution">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="local:ResolutionItem">
