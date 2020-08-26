@@ -46,7 +46,7 @@ namespace SimpleRecorder
         {
             this.InitializeComponent();
 
-            _device = Direct3D11Helpers.CreateDevice();
+            _device = D3DDeviceManager.Device;
 
             var compositor = Window.Current.Compositor;
             var visual = compositor.CreateSpriteVisual();

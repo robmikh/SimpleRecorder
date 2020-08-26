@@ -21,6 +21,9 @@ namespace SimpleRecorder
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            // Force the d3d device to be created
+            var ignored = D3DDeviceManager.Device;
         }
 
         /// <summary>

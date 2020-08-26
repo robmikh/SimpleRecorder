@@ -70,7 +70,7 @@ namespace SimpleRecorder
             _previewVisual.Shadow = shadow;
             ElementCompositionPreview.SetElementChildVisual(CapturePreviewGrid, _previewVisual);
 
-            _device = Direct3D11Helpers.CreateDevice();
+            _device = D3DDeviceManager.Device;
 
             var settings = GetCachedSettings();
 
@@ -298,9 +298,6 @@ namespace SimpleRecorder
             {
                 throw new InvalidOperationException("There is no current preview!");
             }
-
-            var temp = Window.Current.Bounds;
-            Debug.WriteLine($"Width: {temp.Width}  Height: {temp.Height}");
 
             // Get our encoder properties
             var frameRateItem = (FrameRateItem)FrameRateComboBox.SelectedItem;
