@@ -306,6 +306,7 @@ namespace CaptureEncoder
 
         public static uint[] FrameRates => new uint[]
         {
+            24,
             30,
             60
         };
