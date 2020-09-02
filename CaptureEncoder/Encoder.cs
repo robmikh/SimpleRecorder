@@ -36,13 +36,11 @@ namespace CaptureEncoder
             if (!_isRecording)
             {
                 _isRecording = true;
-                _width = width;
-                _height = height;
 
                 _frameGenerator = new CaptureFrameWait(
                     _device,
                     _captureItem,
-                    new SizeInt32() { Width = (int)width, Height = (int)height });
+                    _captureItem.Size);
 
                 using (_frameGenerator)
                 {
@@ -263,9 +261,6 @@ namespace CaptureEncoder
 
         private GraphicsCaptureItem _captureItem;
         private CaptureFrameWait _frameGenerator;
-
-        private uint _width;
-        private uint _height;
 
         private VideoStreamDescriptor _videoDescriptor;
         private MediaStreamSource _mediaStreamSource;
