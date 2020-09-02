@@ -14,7 +14,11 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <MediaPlayerElement x:Name="PreviewPlayer" Margin="15" AutoPlay="True" AreTransportControlsEnabled="True" />
+        <MediaPlayerElement x:Name="PreviewPlayer" Margin="15" AutoPlay="True" AreTransportControlsEnabled="True">
+            <MediaPlayerElement.TransportControls>
+                <MediaTransportControls IsFullWindowEnabled="False" IsFullWindowButtonVisible="False"  />
+            </MediaPlayerElement.TransportControls>
+        </MediaPlayerElement>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="15" HorizontalAlignment="Center">
             <Button Content="Delete" Margin="15, 0, 15, 0" Click="DeleteButton_Click"  />
