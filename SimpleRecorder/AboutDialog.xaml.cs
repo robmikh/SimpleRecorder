@@ -1,4 +1,6 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using System;
+using Windows.ApplicationModel;
+using Windows.UI.Xaml.Controls;
 
 namespace SimpleRecorder
 {
@@ -9,12 +11,23 @@ namespace SimpleRecorder
             this.InitializeComponent();
         }
 
-        private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        public static string GetAppVersion()
         {
-        }
 
-        private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
+            Package package = Package.Current;
+            PackageId packageId = package.Id;
+            PackageVersion version = packageId.Version;
+
+            return string.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
         }
+        public string version = GetAppVersion();
+
+        private async void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            
+            string gitHub = @"https://github.com/robmikh/SimpleRecorder";
+            var uri = new Uri(gitHub);
+            var uriOpened = await Windows.System.Launcher.LaunchUriAsync(uri);
+        }        
     }
 }

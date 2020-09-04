@@ -7,16 +7,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Simple Screen Recorder"
-    PrimaryButtonText="Ok"
+    CloseButtonText="Ok"
+    PrimaryButtonText ="GitHub"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
 
     <StackPanel>
-        <RichTextBlock >
-            <Paragraph>Simple Screen Recorder is a sample application showing off the Windows.Graphics.Capture and Windows.Media.Transcoding APIs.</Paragraph>
+        <RichTextBlock>
+            <Paragraph>"Screen Recorder is a sample application showing off the Windows.Graphics.Capture and Windows.Media.Transcoding APIs."</Paragraph>
         </RichTextBlock>
-
-        <HyperlinkButton NavigateUri="https://github.com/robmikh/SimpleRecorder">
-            GitHub
-        </HyperlinkButton>
+        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+            <TextBlock Text="Version" Margin="0,0,3,0"/>
+            <TextBlock Text="{x:Bind version}" FontWeight="Bold"/>
+        </StackPanel>        
     </StackPanel>
 </ContentDialog>
