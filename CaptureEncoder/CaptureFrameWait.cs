@@ -41,7 +41,8 @@ namespace CaptureEncoder
         public CaptureFrameWait(
             IDirect3DDevice device,
             GraphicsCaptureItem item,
-            SizeInt32 size)
+            SizeInt32 size,
+            bool includeCursor)
         {
             _device = device;
             _d3dDevice = Direct3D11Helpers.CreateSharpDXDevice(device);
@@ -53,10 +54,10 @@ namespace CaptureEncoder
             _events = new[] { _closedEvent, _frameEvent };
 
             InitializeComposeTexture(size);
-            InitializeCapture(size);
+            InitializeCapture(size, includeCursor);
         }
 
-        private void InitializeCapture(SizeInt32 size)
+        private void InitializeCapture(SizeInt32 size, bool includeCursor)
         {
             _item.Closed += OnClosed;
             _framePool = Direct3D11CaptureFramePool.CreateFreeThreaded(
@@ -66,6 +67,10 @@ namespace CaptureEncoder
                 size);
             _framePool.FrameArrived += OnFrameArrived;
             _session = _framePool.CreateCaptureSession(_item);
+            if (!includeCursor)
+            {
+                _session.IsCursorCaptureEnabled = includeCursor;
+            }
             _session.StartCapture();
         }
 

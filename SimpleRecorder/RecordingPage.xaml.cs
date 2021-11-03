@@ -21,13 +21,15 @@ namespace SimpleRecorder
         public SizeUInt32 Resolution { get; }
         public uint Bitrate { get; }
         public uint FrameRate { get; }
+        public bool IncludeCursor { get; }
 
-        public RecordingOptions(GraphicsCaptureItem target, SizeUInt32 resolution, uint bitrate, uint frameRate)
+        public RecordingOptions(GraphicsCaptureItem target, SizeUInt32 resolution, uint bitrate, uint frameRate, bool includeCursor)
         {
             Target = target;
             Resolution = resolution;
             Bitrate = bitrate;
             FrameRate = frameRate;
+            IncludeCursor = includeCursor;
         }
     }
 
@@ -96,7 +98,8 @@ namespace SimpleRecorder
                     await _encoder.EncodeAsync(
                         stream,
                         width, height, options.Bitrate,
-                        options.FrameRate);
+                        options.FrameRate,
+                        options.IncludeCursor);
                 }
             }
             catch (Exception ex)

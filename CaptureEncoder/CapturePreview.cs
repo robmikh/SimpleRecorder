@@ -50,6 +50,19 @@ namespace CaptureEncoder
 
         public GraphicsCaptureItem Target => _item;
 
+        public bool IsCursorCaptureEnabled
+        {
+            get { return _includeCursor; }
+            set
+            {
+                if (_includeCursor != value)
+                {
+                    _includeCursor = value;
+                    _session.IsCursorCaptureEnabled = _includeCursor;
+                }
+            }
+        }
+
         public void StartCapture()
         {
             _session.StartCapture();
@@ -120,6 +133,7 @@ namespace CaptureEncoder
         private Direct3D11CaptureFramePool _framePool;
         private GraphicsCaptureSession _session;
         private SizeInt32 _lastSize;
+        private bool _includeCursor = true;
 
         private IDirect3DDevice _device;
         private SharpDX.Direct3D11.Device _d3dDevice;

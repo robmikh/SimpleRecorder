@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Hosting;
 using System.Numerics;
 using Windows.UI.Composition;
 using Windows.UI.Xaml.Navigation;
+using Windows.Foundation.Metadata;
 
 namespace SimpleRecorder
 {
@@ -115,6 +116,23 @@ namespace SimpleRecorder
             }
             FrameRateComboBox.ItemsSource = _frameRates;
             FrameRateComboBox.SelectedIndex = GetFrameRateIndex(settings.FrameRate);
+
+
+            if (ApiInformation.IsPropertyPresent(typeof(GraphicsCaptureSession).FullName, nameof(GraphicsCaptureSession.IsCursorCaptureEnabled)))
+            {
+                IncludeCursorCheckBox.Visibility = Visibility.Visible;
+                IncludeCursorCheckBox.Checked += IncludeCursorCheckBox_Checked;
+                IncludeCursorCheckBox.Unchecked += IncludeCursorCheckBox_Checked;
+            }
+            IncludeCursorCheckBox.IsChecked = settings.IncludeCursor;
+        }
+
+        private void IncludeCursorCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_preview != null)
+            {
+                _preview.IsCursorCaptureEnabled = ((CheckBox)sender).IsChecked.Value;
+            }
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -149,6 +167,11 @@ namespace SimpleRecorder
             var surface = _preview.CreateSurface(compositor);
             _previewBrush.Surface = surface;
             _preview.StartCapture();
+            var includeCursor = GetIncludeCursor();
+            if (!includeCursor)
+            {
+                _preview.IsCursorCaptureEnabled = includeCursor;
+            }
 
             StartRecordingButton.IsEnabled = true;
         }
@@ -164,6 +187,15 @@ namespace SimpleRecorder
             StartRecordingButton.IsEnabled = false;
         }
 
+        private bool GetIncludeCursor()
+        {
+            if (IncludeCursorCheckBox.Visibility == Visibility.Visible)
+            {
+                return IncludeCursorCheckBox.IsChecked.Value;
+            }
+            return true;
+        }
+
         private AppSettings GetCurrentSettings()
         {
             var resolutionItem = (ResolutionItem)ResolutionComboBox.SelectedItem;
@@ -173,19 +205,21 @@ namespace SimpleRecorder
             var bitrate = bitrateItem.Bitrate;
             var frameRateItem = (FrameRateItem)FrameRateComboBox.SelectedItem;
             var frameRate = frameRateItem.FrameRate;
+            var includeCursor = GetIncludeCursor();
 
-            return new AppSettings { Width = width, Height = height, Bitrate = bitrate, FrameRate = frameRate };
+            return new AppSettings { Width = width, Height = height, Bitrate = bitrate, FrameRate = frameRate, IncludeCursor = includeCursor };
         }
 
         private AppSettings GetCachedSettings()
         {
             var localSettings = ApplicationData.Current.LocalSettings;
-            var result =  new AppSettings
+            var result = new AppSettings
             {
                 Width = 1920,
                 Height = 1080,
                 Bitrate = 18000000,
                 FrameRate = 60,
+                IncludeCursor = true
             };
             
             // Resolution
@@ -231,6 +265,12 @@ namespace SimpleRecorder
                 result.FrameRate = (uint)frameRate;
             }
 
+            // Include cursor
+            if (localSettings.Values.TryGetValue(nameof(AppSettings.IncludeCursor), out var includeCursor))
+            {
+                result.IncludeCursor = (bool)includeCursor;
+            }
+
             return result;
         }
 
@@ -247,6 +287,7 @@ namespace SimpleRecorder
             localSettings.Values[nameof(AppSettings.Height)] = settings.Height;
             localSettings.Values[nameof(AppSettings.Bitrate)] = settings.Bitrate;
             localSettings.Values[nameof(AppSettings.FrameRate)] = settings.FrameRate;
+            localSettings.Values[nameof(AppSettings.IncludeCursor)] = settings.IncludeCursor;
         }
 
         private int GetResolutionIndex(uint width, uint height)
@@ -309,6 +350,7 @@ namespace SimpleRecorder
             var height = resolutionItem.Resolution.Height;
             var bitrate = bitrateItem.Bitrate;
             var frameRate = frameRateItem.FrameRate;
+            var includeCursor = GetIncludeCursor();
 
             // Use the capture item's size for the encoding if desired
             if (useSourceSize)
@@ -319,7 +361,7 @@ namespace SimpleRecorder
             }
             var resolution = new SizeUInt32() { Width = width, Height = height };
 
-            var recordingOptions = new RecordingOptions(_preview.Target, resolution, bitrate, frameRate);
+            var recordingOptions = new RecordingOptions(_preview.Target, resolution, bitrate, frameRate, includeCursor);
             _preview.Dispose();
             _preview = null;
             StartRecordingButton.IsEnabled = false;
@@ -333,6 +375,7 @@ namespace SimpleRecorder
             public uint Height;
             public uint Bitrate;
             public uint FrameRate;
+            public bool IncludeCursor;
         }
 
         private IDirect3DDevice _device;

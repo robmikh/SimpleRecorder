@@ -26,12 +26,12 @@ namespace CaptureEncoder
             CreateMediaObjects();
         }
 
-        public IAsyncAction EncodeAsync(IRandomAccessStream stream, uint width, uint height, uint bitrateInBps, uint frameRate)
+        public IAsyncAction EncodeAsync(IRandomAccessStream stream, uint width, uint height, uint bitrateInBps, uint frameRate, bool includeCursor)
         {
-            return EncodeInternalAsync(stream, width, height, bitrateInBps, frameRate).AsAsyncAction();
+            return EncodeInternalAsync(stream, width, height, bitrateInBps, frameRate, includeCursor).AsAsyncAction();
         }
 
-        private async Task EncodeInternalAsync(IRandomAccessStream stream, uint width, uint height, uint bitrateInBps, uint frameRate)
+        private async Task EncodeInternalAsync(IRandomAccessStream stream, uint width, uint height, uint bitrateInBps, uint frameRate, bool includeCursor)
         {
             if (!_isRecording)
             {
@@ -40,7 +40,8 @@ namespace CaptureEncoder
                 _frameGenerator = new CaptureFrameWait(
                     _device,
                     _captureItem,
-                    _captureItem.Size);
+                    _captureItem.Size,
+                    includeCursor);
 
                 using (_frameGenerator)
                 {
