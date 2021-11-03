@@ -1,4 +1,5 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using Windows.ApplicationModel;
+using Windows.UI.Xaml.Controls;
 
 namespace SimpleRecorder
 {
@@ -7,14 +8,9 @@ namespace SimpleRecorder
         public AboutDialog()
         {
             this.InitializeComponent();
-        }
 
-        private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
-        }
-
-        private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
+            var version = Package.Current.Id.Version;
+            VersionTextBlock.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
         }
     }
 }

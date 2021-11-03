@@ -7,13 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Simple Screen Recorder"
-    PrimaryButtonText="Ok"
-    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+    PrimaryButtonText="Close"
+    IsSecondaryButtonEnabled="False">
 
     <StackPanel>
         <RichTextBlock >
             <Paragraph>Simple Screen Recorder is a sample application showing off the Windows.Graphics.Capture and Windows.Media.Transcoding APIs.</Paragraph>
         </RichTextBlock>
+
+        <TextBlock x:Name="VersionTextBlock" Margin="0, 5, 0, 5" />
 
         <HyperlinkButton NavigateUri="https://github.com/robmikh/SimpleRecorder">
             GitHub
